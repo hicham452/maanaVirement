@@ -1,0 +1,71 @@
+<%- include('../partials/header'); %>
+    <form action="/api/capaciteFin" method="post">
+        <div class="container">
+            <div class="row">
+                
+                  <div class="card card grey lighten-4 z-depth-2">
+                    <div class="card-content ">
+                      <span class="card-title">ATTESTATION DE CAPACITE FINANCIERE</span>
+                      <div class="row">
+                        <div class="input-field col s6">
+                          <input  id="compte" name="compte" type="text">
+                          <label for="compte">N° De Compte</label>
+                        </div>
+                        <div class="input-field col s6">
+                          <input id="agence" name="agence" type="text">
+                          <label for="agence">Agence</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input id="montant" name="montant" type="text">
+                            <label for="montant">Montant</label>
+                          </div>
+                  <!--       <div class="input-field col s6">
+                            <input id="directeur" name="directeur" type="text">
+                            <label for="directeur">Directeur</label>
+                          </div> -->
+                <!--           <div class="input-field col s6">
+                            <input id="adjoint" name="adjoint" type="text">
+                            <label for="adjoint">Adjoint</label>
+                          </div> -->
+                        <button class="btn blue">submit</button>
+                      </div>
+                    </div>
+
+
+<!--                     <div class="card-content ">
+                        <span class="card-title">Consultation</span>
+                        <div class="row">
+                          <div class="input-field col s6">
+                            <input  id="compte" name="compte" type="text">
+                            <label for="compte">N° De Compte</label>
+                          </div>
+                          <div class="input-field col s6">
+                            <input id="agence" name="agence" type="text">
+                            <label for="agence">Agence</label>
+                          </div>
+                          <div class="input-field col s6">
+                              <input id="directeur" name="directeur" type="text">
+                              <label for="directeur">Directeur</label>
+                            </div>
+                            <div class="input-field col s6">
+                              <input id="adjoint" name="adjoint" type="text">
+                              <label for="adjoint">Adjoint</label>
+                            </div>
+                          <button class="btn blue">submit</button>
+                        </div>
+                      </div> -->
+<!--                     <div class="card-action">
+                      <a href="#">This is a link</a>
+                      <a href="#">This is a link</a>
+                    </div> -->
+                  
+                  </div>
+              
+              </div>
+
+        </div>
+        
+    
+    </form>
+
+<%- include('../partials/footer'); %>

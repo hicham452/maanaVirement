@@ -1,0 +1,29 @@
+{
+  "name": "attestationRib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cookie-parser": "^1.4.5",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "g": "^2.0.1",
+    "joi": "^17.3.0",
+    "joi-objectid": "^3.0.1",
+    "joi-password-complexity": "^5.0.2",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.20",
+    "moment": "^2.29.1",
+    "mongoose": "^5.11.8",
+    "pdfmake": "^0.1.69",
+    "sequelize": "^6.6.5",
+    "tedious": "^6.0.0"
+  }
+}

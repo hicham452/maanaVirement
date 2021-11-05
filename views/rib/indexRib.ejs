@@ -1,0 +1,415 @@
+<%- include('../partials/header'); %>
+
+
+<div class="container">
+  <div class="row">
+
+    <div class="card card  z-depth-2">
+      <div class="card-content ">
+        <span class="card-title">ATTESTATION DE RIB</span>
+        <div class="card-tabs">
+          <ul class="tabs ">
+           
+            <li class="tab col s6 "> <a class="blue-text" href="#generation">Generation</a></li>
+      
+            <li class="tab col s6 "> <a class="blue-text" href="#consultation">Consultation</a></li>
+          </ul>
+        </div>
+        <div class="card-content">
+     
+          <div id="generation">
+
+            <form action="/api/rib" method="post">
+              <div class="row">
+                <div class="input-field col s6">
+                  <input id="compte" name="compte" type="text" minlength="10" maxlength="10" size="10" required>
+                  <label for="compte">N° De Compte</label>
+                </div>
+                <div class="input-field col s6">
+                  <input disabled id="agence" name="agence" value="78000" type="text">
+                  <label for="agence">Agence</label>
+                </div>
+                <div class="directeur input-field col s6">
+                  <select id="directeur" required="required" name="directeur" required>
+                    <option value="" disabled selected>1er Signataire</option>
+                    <option value="Ouichoul Hicham">Ouichoul Hicham</option>
+                    <option value="Ouichoul Hicham">Ouichoul Hicham</option>
+                  </select>
+                  <label data-error="Select an option" for="directeur">Directeur</label>
+                </div>
+                <div class="input-field col s6 ">
+                  <select id="adjoint" name="adjoint" required="required">
+                    <option value="" disabled selected>1er Signataire</option>
+                    <option value="Ouichoul Hicham">Ouichoul Hicham</option>
+                    <option value="Ouichoul Hicham">Ouichoul Hicham</option>
+                  </select>
+                  <label data-error="Select an option" for="adjoint">Adjoint</label>
+                </div>
+              </div>
+              <div class="row">
+                <button class="btn blue">Genérer</button>
+                <a href="/api/index" class="btn">Retour</a>
+              </div>
+            </form>
+          </div>
+      
+          <div id="consultation">
+            <span class="card-title">CRITERE DE RECHERCHE</span>
+            <form style="margin-top:1vw;" action="/api/rib/index" method="post">
+              <div class="row">
+                <div class="input-field col s6">
+                  <input id="compte" name="ncp" type="text">
+                  <label for="compte">N° De Compte</label>
+                </div>
+                <div class="input-field col s6">
+                  <input id="id" name="id" type="text">
+                  <label for="id">ID Document</label>
+                </div>
+                <div class="input-field col s6">
+                  <i class="material-icons prefix">date_range</i>
+                  <input id="dateDebut" name="dateDebut" class="datepicker" type="text">
+                  <label for="dateDebut">date Dédut </label>
+                </div>
+                <div class="input-field col s6">
+                  <i class="material-icons prefix">date_range</i>
+                  <input id="dateFin" name="dateFin" class="datepicker" type="text">
+                  <label for="dateFin">date Fin </label>
+                </div>
+              </div>
+
+              <div class="row">
+                <button class="btn">rechercher</button>
+              </div>
+            </form>
+            <span class="card-title" style="margin-top:2vw;">RESULTAT DE RECHERCHE</span>
+            <table class="striped" id="ribTable">
+              <thead>
+                <tr>
+                  <th>Id Attestation</th>
+                  <th>Agence</th>
+                  <th>N° Compte</th>
+                  <th>Date Generation</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Structure -->
+<div id="modal1" class="modal">
+  <div class="modal-content">
+    <h4>Détail Attestation RIB</h4>
+    <div class="collection">
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer'); %>
+<script>
+  const table2 = $('#ribTable').DataTable({
+    bFilter: false,
+    ordering: true,
+    lengthChange: false,
+    paging: true,
+    dom: 'Bfrtip',
+    buttons: [{
+      extend: 'excel',
+      tag: 'a',
+      text: "<i class='material-icons medium' > cloud_download</i>",
+      title: 'List Attestations Rib'
+    }],
+    language: {
+      "url": "/public/js/datatable_French.json"
+    },
+    /* pagingType: "simple", */
+    columns: [
+/*       {
+        data: '_id',
+        "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+          $(nTd).html(
+            `<a class="detail" onclick=return showDetail() href="/api/rib/${oData._id}">${oData._id}</a>`);
+        }
+      }, */
+      {
+        data: 'age'
+      },
+      {
+        data: 'ncp'
+      },
+      {
+        data: 'date',
+        type: 'date',
+        render: function (value) {
+          if (value === null) return "";
+          return moment(value).format('DD/MM/YYYY HH:MM');
+        }
+      }
+    ]
+  });
+
+
+
+  const form = document.querySelector('#generation form');
+  const form2 = document.querySelector('#consultation form');
+  const loginError = document.querySelector('.error');
+  const modal = document.querySelector(".modal-content .collection");
+
+
+  //console.log(pagination)
+  //activate modals
+  $('.modal').modal();
+  //activate datepicker
+  $('.datepicker').datepicker({
+    disableWeekends: true,
+    showClearBtn: true,
+    autoClose: true,
+    i18n: {
+
+      months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre',
+        'Novembre', 'Décembre'
+      ],
+      monthsShort: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
+      weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+      weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+      weekdaysAbbrev: ['D', 'L', 'M', 'M', 'J', 'V', 'S']
+    },
+
+
+  });
+
+
+  //handel genreration rib form
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      let result;
+
+      result = confirm('Etes-vous sur de vouloir générer l\'attestation?');
+
+      if (!result) {
+
+        M.toast({
+          html: "Demande Annulée",
+          displayLength: 6000,
+          classes: 'red rounded h4'
+        })
+
+        return false
+
+
+      } else {
+
+        // get values
+        const compte = form.compte.value;
+        const agence = form.agence.value;
+        const directeur = form.directeur.value;
+        const adjoint = form.adjoint.value;
+
+
+        try {
+          const res = await fetch('/api/rib', {
+            method: 'POST',
+            body: JSON.stringify({
+              compte,
+              agence,
+              directeur,
+              adjoint
+
+            }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+
+          const result = await res
+          console.log(result.status)
+
+          if (result.status === 200) {
+            let filename = result.headers.get("Content-Disposition")
+            filename = filename.match(/filename="(.+)"/)[1]
+            console.log(filename)
+            const blob = await res.blob();
+            var file = window.URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = file;
+            link.download = filename;
+            document.body.appendChild(link)
+            link.click();
+            document.body.removeChild(link);
+
+            M.toast({
+              html: "attestation generer",
+              displayLength: 6000,
+              classes: 'green rounded h4'
+            })
+          } else if (result.status === 400) {
+
+            const data = await res.json();
+
+            M.toast({
+              html: data.error,
+              displayLength: 6000,
+              classes: 'red rounded h4'
+            })
+
+          } else {
+
+            location.assign("/api/auth/?error=l'opération non pas aboutie , Utilisateur déconnecté")
+
+          }
+
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
+    });
+  }
+
+
+  //handel recherche form
+
+ /*  form2.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+    table2.clear().draw()
+
+    const ncp = form2.ncp.value;
+    const age = form2.age.value;
+    const id = form2.id.value;
+    const dateDebut = form2.dateDebut.value
+    const dateFin = form2.dateFin.value
+    try {
+      const res = await fetch('/api/rib/index', {
+        method: 'POST',
+        body: JSON.stringify({
+          ncp,
+          age,
+          id,
+          dateDebut,
+          dateFin
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const result = await res
+      console.log(result.status)
+      if (result.status === 200) {
+        const data = await res.json()
+        //insert recherche result into table
+        table2.rows.add(data.rib).draw();
+
+
+        //console.log(detail);
+       
+      } else if (result.status === 400) {
+
+        const data = await res.json();
+
+        M.toast({
+          html: data.error,
+          displayLength: 6000,
+          classes: 'red rounded h4'
+        })
+
+      } else if (result.status === 401) {
+        location.assign("/api/auth/?error=l'opération non pas aboutie , Utilisateur déconnecté")
+
+      }
+
+
+
+    } catch (err) {
+
+      console.log(err)
+    }
+  })
+ */
+
+  //handel affichage detail attestation
+ /*  table2.on('draw', function () {
+    // console.log( 'Redraw occurred at: '+new Date().getTime() );
+
+    const detail = document.querySelectorAll(".detail");
+
+    detail.forEach(element => {
+
+      element.addEventListener("click", async function (e) {
+
+        e.preventDefault();
+
+        let id = this.innerHTML
+        try {
+          const resDetail = await fetch(`/api/rib/${id}`, {
+            method: 'POST',
+            body: JSON.stringify({
+              id
+            }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+
+          })
+
+          const result = await resDetail
+          console.log(result.status)
+          if (result.status === 200) {
+            const resultDetail = await resDetail.json();
+
+            //aliment modal div
+            let ribDetail = "";
+            ribDetail +=
+              `<a   class="collection-item black-text"> <b>ID Attestation : </b> <span>${resultDetail.rib._id}</span> </a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>Agence : </b> <span> ${resultDetail.rib.age}</span></a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>Compte : </b> <span> ${resultDetail.rib.ncp}</span></a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>1er Signataire : </b> <span>${resultDetail.rib.directeur}</span></a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>2ème Signataire : </b> <span>${resultDetail.rib.adjoint}</span></a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>Date : </b> <span> ${moment(resultDetail.rib.date).format('DD/MM/YYYY HH:MM')}</span></a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>Opérateur : </b> <span> ${resultDetail.rib.username}</span></a>`
+            modal.innerHTML = ribDetail
+            //create modal trigger
+            const linkDetail = document.createElement("a");
+            linkDetail.href = "#modal1";
+            linkDetail.classList.add("modal-trigger");
+            document.body.appendChild(linkDetail)
+            linkDetail.click();
+            document.body.removeChild(linkDetail);
+          } else if (result.status === 401) {
+
+            location.assign("/api/auth/?error=l'opération non pas aboutie , Utilisateur déconnecté")
+          }
+
+        } catch (err) {
+
+          console.log(err)
+        }
+
+      })
+
+    })
+  }); */
+
+  /* let token =  document.cookie.split('; ').find(row => row.startsWith('jwt')).split('=')[1]
+  const parseJWT = jwtString => JSON.parse(atob(jwtString.split('.')[1]));
+  let eta = parseJWT(token).exp
+  console.log(eta)
+  console.log(Math.floor(Date.now() / 1000))
+  setTimeout(()=> {
+    console.log(Math.floor(Date.now() / 1000))
+  },1000) */
+</script>

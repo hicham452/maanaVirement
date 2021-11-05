@@ -1,0 +1,632 @@
+<%- include('./partials/header'); %>
+
+
+<div class="container">
+  <div class="row">
+
+    <div class="card card  z-depth-2">
+      <div class="card-content ">
+        <div class="card-tabs">
+          <ul class="tabs ">
+           
+            <li class="tab col s6 "> <a class="blue-text" href="#order">Order de Virement</a></li>
+      
+            <li class="tab col s6 "> <a class="blue-text" href="#correspondant">Correspondant</a></li>
+          </ul>
+        </div>
+        <div class="card-content">
+     <!-- generation  order de virement -->
+          <div id="order">
+            <span class="card-title">GENERATION ORDRE DE VIREMENT</span>
+            <form action="/api/rib" method="post">
+              <div class="row">
+                <div class="input-field col s6">
+                    <input id="montant" name="montant" type="number" step="any" required>
+                    <label for="montant">Montant en DH</label>
+                </div>
+                <div class="rib input-field col s6">
+                  <select id="rib" required="required" name="rib" required>
+                    <option value="" disabled selected>Selectionner un Correspondant</option>
+                    <% if (correspondants.length > 0) { %> 
+                      <% correspondants.forEach(element => { %>
+                        <option value="<%= element.rib %> "><%= element.rs %> </option>
+                    <% }) %> 
+
+                    <% } %> 
+                  
+                    
+                  </select>
+                  <label data-error="Select an option" for="rib">Correspondant</label>
+                </div>
+                <div class="input-field col s6">
+                    <i class="material-icons prefix">date_range</i>
+                    <input id="dateOrder" name="dateOrder" class="datepicker order-date" type="text">
+                    <label for="dateOrder">Date Valeur</label>
+                  </div>
+                <div class="input-field col s6">
+                    <textarea id="motif" class="materialize-textarea" data-length="120" maxlength="120"></textarea>
+                    <label for="motif">Motif</label>
+                </div>
+              </div>
+              <div class="row">
+                <button class="btn">Genérer</button>
+              </div>
+            </form>
+
+        <hr>
+
+
+        <div class="line"></div>
+
+         <!-- critere de recherche order -->
+            <span class="card-title">RECHERCHE ORDRE DE VIREMENT</span>
+            <form id='order-search' style="margin-top:1vw;">
+              <div class="row">
+                <div class="input-field col s6">
+                  <input id="ribOrderRecherche" name="ribOrderRecherche" maxlength="24" type="text">
+                  <label for="ribOrderRecherche">RIB</label>
+                </div>
+                <div class="input-field col s6">
+                  <input id="rsOrderRecherche" name="rsOrderRecherche" type="text">
+                  <label for="rsOrderRecherche">Raison Sociale</label>
+                </div>
+                 <div class="input-field col s6">
+                  <i class="material-icons prefix">date_range</i>
+                  <input id="dateDebutOrder" name="dateDebutOrder" class="datepicker interval" type="text">
+                  <label for="dateDebutOrder">date Dédut </label>
+                </div> 
+                 <div class="input-field col s6">
+                  <i class="material-icons prefix">date_range</i>
+                  <input id="dateFinOrder" name="dateFinOrder" class="datepicker interval" type="text">
+                  <label for="dateFinOrder">date Fin </label>
+                </div> 
+              </div>
+  
+              <div class="row">
+                <button class="btn">rechercher</button>
+              </div>
+            </form>
+       
+            <!-- recherche order table -->
+            <div id="order-table-wrapper">
+                <span class="card-title">RESULTAT : </span>
+                <table id="order-table" class="stripe" style="width: 100%;">
+                </table>
+              </div>
+          </div>
+
+      
+
+          
+
+       
+
+      
+          <div id="correspondant">
+            <!-- AJOUT CORRESPONDANT -->
+            <span class="card-title">AJOUT CORRESPONDANT</span>
+            <form id="correspondant-ajout" action="/api/correspondant" method="post">
+                <div class="row">
+  <!--                 <div class="input-field col s6">
+                    <input id="compte" name="compte" type="text" minlength="10" maxlength="10" size="10" required>
+                    <label for="compte">N° De Compte</label>
+                  </div> -->
+
+                  <!-- ville -->
+                 <!--  <div class="input-field col s4">
+                      <input id="ville" name="ville" type="text" minlength="2" maxlength="120" required>
+                      <label for="ville">Ville</label>
+                  </div> -->
+
+                  <!-- Hotel -->
+              <!--     <div class="input-field col s4">
+                    <input id="hotel" name="hotel" type="text" minlength="2" maxlength="120" required>
+                    <label for="hotel">Hotel</label>
+                </div> -->
+
+                <!-- Raison Social -->
+                <div class="input-field col s6">
+                    <input id="rsAjout" name="rsAjout" type="text" minlength="2" maxlength="120" required>
+                    <label for="rsAjout">Raison Sociale</label>
+                </div>
+
+                <div class="input-field col s6">
+                  <input id="ribAjout" name="ribAjout" type="text" minlength="24" maxlength="24" size="24" pattern=".{24}" title="un RIB doit  Comprendre 24 Chiffres" required>
+                  <label for="ribAjout">RIB</label>
+              </div>
+
+            </div>
+         <!--    <div class="row"> -->
+                <!-- categorie -->
+            <!--     <div class="categorie input-field col s4">
+                    <select id="categorie" required="required" name="categorie" required>
+                      <option value="" disabled selected>Selectionner une Catégorie</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                    </select>
+                    <label data-error="Select an option" for="categorie">Categorie</label>
+                  </div> -->
+
+                <!-- RIB -->
+              
+
+                <!-- CODE SWIFT -->
+               <!--  <div class="input-field col s4">
+                    <input id="swift" name="swift" type="text" minlength="2" maxlength="24" required>
+                    <label for="swift">SWIFT</label>
+                </div> -->
+
+       <!--      </div> -->
+
+             <!--      <div class="input-field col s6">
+                    <input disabled id="agence" name="agence" value="78000" type="text">
+                    <label for="agence">Agence</label>
+                  </div> -->
+                  
+  <!--                  <div class="input-field col s6 ">
+                    <select id="adjoint" name="adjoint" required="required">
+                      <option value="" disabled selected>1er Signataire</option>
+                      <option value="Ouichoul Hicham">Ouichoul Hicham</option>
+                      <option value="Ouichoul Hicham">Ouichoul Hicham</option>
+                    </select>
+                    <label data-error="Select an option" for="adjoint">Adjoint</label>
+                  </div>  -->
+               
+                <div class="row">
+                  <button class="btn">Ajouter</button>
+                </div>
+              </form>
+
+
+              <hr>
+
+
+              <div class="line"></div>
+              <!--===================================================-->
+
+                       <!-- critere de recherche order -->
+            <span class="card-title">RECHERCHE CORRESPONDANT</span>
+            <form id='correspondant-search' style="margin-top:1vw;">
+              <div class="row">
+                <div class="input-field col s6">
+                  <input id="rsCorresRecherche" name="rsCorresRecherche" type="text">
+                  <label for="rsCorresRecherche">Raison Sociale</label>
+                </div>
+                <div class="input-field col s6">
+                  <input id="ribCorresRecherche" name="ribCorresRecherche" type="text">
+                  <label for="ribCorresRecherche">RIB</label>
+                </div>
+              
+              </div>
+  
+              <div class="row">
+                <button class="btn">rechercher</button>
+              </div>
+            </form>
+          
+            <!-- recherche order table -->
+            <div id="order-table-wrapper">
+                <span class="card-title">RESULTAT : </span>
+                <table id="correspondant-table" class="stripe" style="width: 100%;">
+                </table>
+              </div>
+          </div>
+<!--             <span class="card-title">CRITERE DE RECHERCHE</span>
+            <form style="margin-top:1vw;" action="/api/rib/index" method="post">
+              <div class="row">
+                <div class="input-field col s6">
+                  <input id="compte" name="ncp" type="text">
+                  <label for="compte">N° De Compte</label>
+                </div>
+                <div class="input-field col s6">
+                  <input id="id" name="id" type="text">
+                  <label for="id">ID Document</label>
+                </div>
+                <div class="input-field col s6">
+                  <i class="material-icons prefix">date_range</i>
+                  <input id="dateDebut" name="dateDebut" class="datepicker" type="text">
+                  <label for="dateDebut">date Dédut </label>
+                </div>
+                <div class="input-field col s6">
+                  <i class="material-icons prefix">date_range</i>
+                  <input id="dateFin" name="dateFin" class="datepicker" type="text">
+                  <label for="dateFin">date Fin </label>
+                </div>
+              </div>
+
+              <div class="row">
+                <button class="btn">rechercher</button>
+              </div>
+            </form> -->
+<!--             <span class="card-title" style="margin-top:2vw;">RESULTAT DE RECHERCHE</span>
+            <table class="striped" id="ribTable">
+              <thead>
+                <tr>
+                  <th>Id Attestation</th>
+                  <th>Agence</th>
+                  <th>N° Compte</th>
+                  <th>Date order</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Structure -->
+<div id="modal1" class="modal">
+  <div class="modal-content">
+    <h4>Détail Attestation RIB</h4>
+    <div class="collection">
+    </div>
+  </div>
+</div>
+
+<%- include('./partials/footer'); %>
+<script>
+
+
+$(document).ready(function() {
+
+    //change nav bar 
+    $(window).scroll(()=> {
+
+        if($(this).scrollTop() > 50){
+
+         $("nav").addClass("vesco-top-nav");
+
+                }else {
+
+                 $("nav").removeClass("vesco-top-nav");
+            }
+        })
+
+
+
+
+    //activate counter in motif text area
+    $('#motif').characterCounter();
+    // add decimal to montant input
+    $("#montant").change(function() {
+            $(this).val(parseFloat($(this).val()).toFixed(2));
+        });
+  });
+        
+  const table2 = $('#ribTable').DataTable({
+    bFilter: false,
+    ordering: true,
+    lengthChange: false,
+    paging: true,
+    dom: 'Bfrtip',
+    buttons: [{
+      extend: 'excel',
+      tag: 'a',
+      text: "<i class='material-icons medium' > cloud_download</i>",
+      title: 'List Attestations Rib'
+    }],
+    language: {
+      "url": "/public/js/datatable_French.json"
+    },
+    /* pagingType: "simple", */
+    columns: [
+/*       {
+        data: '_id',
+        "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+          $(nTd).html(
+            `<a class="detail" onclick=return showDetail() href="/api/rib/${oData._id}">${oData._id}</a>`);
+        }
+      }, */
+      {
+        data: 'age'
+      },
+      {
+        data: 'ncp'
+      },
+      {
+        data: 'date',
+        type: 'date',
+        render: function (value) {
+          if (value === null) return "";
+          return moment(value).format('DD/MM/YYYY HH:MM');
+        }
+      }
+    ]
+  });
+
+
+
+  const form = document.querySelector('#order form');
+  const form2 = document.querySelector('#correspondant form');
+  const loginError = document.querySelector('.error');
+  const modal = document.querySelector(".modal-content .collection");
+
+
+  //console.log(pagination)
+  //activate modals
+  $('.modal').modal();
+  //activate datepicker
+  $('.datepicker.order-date').datepicker({
+    disableWeekends: true,
+    showClearBtn: true,
+    autoClose: true,
+    format : 'dd-mm-yyyy',
+    defaultDate :  new Date(),
+    setDefaultDate : true,
+
+    i18n: {
+
+      months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre',
+        'Novembre', 'Décembre'
+      ],
+      monthsShort: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
+      weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+      weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+      weekdaysAbbrev: ['D', 'L', 'M', 'M', 'J', 'V', 'S']
+    },
+
+
+  });
+
+  //datepiker for search without defaut value
+  $('.datepicker.interval').datepicker({
+    disableWeekends: true,
+    showClearBtn: true,
+    autoClose: true,
+    format : 'dd-mm-yyyy',
+ /*    defaultDate :  new Date(),
+    setDefaultDate : true, */
+
+    i18n: {
+
+      months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre',
+        'Novembre', 'Décembre'
+      ],
+      monthsShort: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
+      weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+      weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+      weekdaysAbbrev: ['D', 'L', 'M', 'M', 'J', 'V', 'S']
+    },
+
+
+  });
+
+
+  //handel genreration rib form
+/*   if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      let result;
+
+      result = confirm('Etes-vous sur de vouloir générer l\'Order de Virement?');
+
+      if (!result) {
+
+        M.toast({
+          html: "Demande Annulée",
+          displayLength: 2000,
+          classes: 'red rounded h4'
+        })
+
+        return false
+
+
+      } else {
+
+        // get values
+        const montant = form.montant.value;
+        const motif = form.motif.value;
+        const rib = form.rib.value;
+        const dateOrder = form.dateOrder.value;
+
+        console.log(montant,motif,rib,dateOrder);
+
+
+        try {
+          const res = await fetch('/api/rib', {
+            method: 'POST',
+            body: JSON.stringify({
+             // compte,
+              //agence,
+              rib,
+             // adjoint
+
+            }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+
+          const result = await res
+          console.log(result.status)
+
+          if (result.status === 200) {
+            let filename = result.headers.get("Content-Disposition")
+            filename = filename.match(/filename="(.+)"/)[1]
+            //console.log(filename)
+            const blob = await res.blob();
+            var file = window.URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = file;
+            link.download = filename;
+            document.body.appendChild(link)
+            link.click();
+            document.body.removeChild(link);
+
+            M.toast({
+              html: "attestation generer",
+              displayLength: 2000,
+              classes: 'green rounded h4'
+            })
+          } else if (result.status === 400) {
+
+            const data = await res.json();
+
+            M.toast({
+              html: data.error,
+              displayLength: 6000,
+              classes: 'red rounded h4'
+            })
+
+          } else {
+
+            location.assign("/api/auth/?error=l'opération non pas aboutie , Utilisateur déconnecté")
+
+          }
+
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
+    });
+  } */
+
+
+  //handel recherche form
+
+ /*  form2.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+    table2.clear().draw()
+
+    const ncp = form2.ncp.value;
+    const age = form2.age.value;
+    const id = form2.id.value;
+    const dateDebut = form2.dateDebut.value
+    const dateFin = form2.dateFin.value
+    try {
+      const res = await fetch('/api/rib/index', {
+        method: 'POST',
+        body: JSON.stringify({
+          ncp,
+          age,
+          id,
+          dateDebut,
+          dateFin
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      const result = await res
+      console.log(result.status)
+      if (result.status === 200) {
+        const data = await res.json()
+        //insert recherche result into table
+        table2.rows.add(data.rib).draw();
+
+
+        //console.log(detail);
+       
+      } else if (result.status === 400) {
+
+        const data = await res.json();
+
+        M.toast({
+          html: data.error,
+          displayLength: 6000,
+          classes: 'red rounded h4'
+        })
+
+      } else if (result.status === 401) {
+        location.assign("/api/auth/?error=l'opération non pas aboutie , Utilisateur déconnecté")
+
+      }
+
+
+
+    } catch (err) {
+
+      console.log(err)
+    }
+  })
+ */
+
+  //handel affichage detail attestation
+ /*  table2.on('draw', function () {
+    // console.log( 'Redraw occurred at: '+new Date().getTime() );
+
+    const detail = document.querySelectorAll(".detail");
+
+    detail.forEach(element => {
+
+      element.addEventListener("click", async function (e) {
+
+        e.preventDefault();
+
+        let id = this.innerHTML
+        try {
+          const resDetail = await fetch(`/api/rib/${id}`, {
+            method: 'POST',
+            body: JSON.stringify({
+              id
+            }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+
+          })
+
+          const result = await resDetail
+          console.log(result.status)
+          if (result.status === 200) {
+            const resultDetail = await resDetail.json();
+
+            //aliment modal div
+            let ribDetail = "";
+            ribDetail +=
+              `<a   class="collection-item black-text"> <b>ID Attestation : </b> <span>${resultDetail.rib._id}</span> </a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>Agence : </b> <span> ${resultDetail.rib.age}</span></a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>Compte : </b> <span> ${resultDetail.rib.ncp}</span></a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>1er Signataire : </b> <span>${resultDetail.rib.directeur}</span></a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>2ème Signataire : </b> <span>${resultDetail.rib.adjoint}</span></a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>Date : </b> <span> ${moment(resultDetail.rib.date).format('DD/MM/YYYY HH:MM')}</span></a>`
+            ribDetail +=
+              `<a  class="collection-item black-text"><b>Opérateur : </b> <span> ${resultDetail.rib.username}</span></a>`
+            modal.innerHTML = ribDetail
+            //create modal trigger
+            const linkDetail = document.createElement("a");
+            linkDetail.href = "#modal1";
+            linkDetail.classList.add("modal-trigger");
+            document.body.appendChild(linkDetail)
+            linkDetail.click();
+            document.body.removeChild(linkDetail);
+          } else if (result.status === 401) {
+
+            location.assign("/api/auth/?error=l'opération non pas aboutie , Utilisateur déconnecté")
+          }
+
+        } catch (err) {
+
+          console.log(err)
+        }
+
+      })
+
+    })
+  }); */
+
+  /* let token =  document.cookie.split('; ').find(row => row.startsWith('jwt')).split('=')[1]
+  const parseJWT = jwtString => JSON.parse(atob(jwtString.split('.')[1]));
+  let eta = parseJWT(token).exp
+  console.log(eta)
+  console.log(Math.floor(Date.now() / 1000))
+  setTimeout(()=> {
+    console.log(Math.floor(Date.now() / 1000))
+  },1000) */
+</script>

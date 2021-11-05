@@ -1,0 +1,119 @@
+<%- include('../partials/header'); %>
+
+<style>
+    .col.s12>.btn-small {
+        width: 100%;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="card z-depth-2">
+            <div class="card-content ">
+                <span style="margin-bottom:3vw;" class="card-title">ATTESTATION DU MOUVEMENT COMMERCIAL EN ATTENTE DE
+                    VALIDATION </span>
+
+
+                <div class="row">
+                    <div class="input-field col s4">
+                        <input id="idDocument" name="idDocument" type="text" class="black-text"
+                            value="<%= mouvement._id %> " disabled required>
+                        <label for="idDocument">Id Document</label>
+                    </div>
+                    <div class="input-field col s2">
+                        <input id="agence" name="agence" class="black-text" value="<%= mouvement.age %> " disabled
+                            type="text">
+                        <label for="agence">Agence</label>
+                    </div>
+                    <div class="input-field col s3">
+                        <input id="compte" name="compte" type="text" class="black-text" value="<%= mouvement.ncp %> "
+                            disabled required>
+                        <label for="compte">N° De Compte</label>
+                    </div>
+                   
+                    <div class="input-field col s3">
+                        <input id="Date" name="Date" class="black-text"
+                            value="<%=  moment(mouvement.date).format("DD/MM/YYYY HH:MM") %> " disabled type="text">
+                        <label for="Date">Date Demande</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <input id="RSClient" name="RSClient" type="text" class="black-text"
+                            value="<%= mouvement.nom +' '+ mouvement.pre %> " disabled required>
+                        <label for="RSClient">RS Client</label>
+                    </div>
+                    <div class="input-field col s5">
+                        <input id="Inititule" name="Inititule" class="black-text" value="<%= mouvement.inti %> "
+                            disabled type="text">
+                        <label for="Inititule">Inititulé Compte</label>
+                    </div>
+                    <div class="input-field col s6">
+                        <input id="directeur" name="directeur" type="text" class="black-text"
+                            value="<%= mouvement.directeur %> " disabled required>
+                        <label for="directeur">1er Signataire</label>
+                    </div>
+                    <div class="input-field col s5">
+                        <input id="adjoint" name="adjoint" class="black-text" value="<%= mouvement.adjoint %> " disabled
+                            type="text">
+                        <label for="adjoint">2ème Signataire</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <h6>LISTE DES MOUVEMENTS COMMERCIALS</h6>
+                    <br>
+
+                    <% mouvement.mouvement.forEach(element => { %>
+
+                    <div class="input-field col s4">
+                        <i class="material-icons prefix">date_range</i>
+                        <input type="text" id="dateDebut" class="datepicker black-text"
+                            value="<%=moment(element.dateDebut).format("DD/MM/YYYY")%>" name="dateDebut" disabled
+                            required>
+                        <label for="dateDebut">Date Debut</label>
+                    </div>
+                    <div class="input-field col s4">
+                        <i class="material-icons prefix">date_range</i>
+                        <input type="text" id="dateFin" class="datepicker black-text"
+                            value="<%=moment(element.dateFin).format("DD/MM/YYYY")%>" name="dateFin" disabled required>
+                        <label for="dateFin">Date Fin</label>
+                    </div>
+                    <div class="input-field col s3">
+                        <input id="montant" type="text" class="black-text"
+                            value="<%=element.montant.toFixed(2) +' DH'%>" name="montant" disabled required>
+                        <label for="montant">Montant</label>
+                    </div>
+
+                    <% }); %>
+                </div>
+                <div class="row">
+                    <fieldset class="text-black">
+                        <legend>
+                            <h6>STATUER SUR LA DEMANDE</h6>
+                        </legend>
+                        <form id="reject"  action="/api/mouvement/<%= mouvement._id%>/valid" method="post">
+                            <div class="input-field col s12">
+                                <i class="material-icons prefix">mode_edit</i>
+                                <textarea id="textarea1" class="materialize-textarea"
+                                    placeholder="En cas de rejet saisir un Motif de rejet" name="motifReject" required></textarea>
+                                <label for="textarea1">Motif Rejet</label>
+                                <input data-id="<%= mouvement._id %> " hidden name="etape" value="3">
+                                <button class="btn-small red lighten-1 waves-effect waves-light">Rejeter</button>
+                            </div>
+                        </form>
+                        <form id="valid" action="/api/mouvement/<%= mouvement._id%>/valid" method="post">
+                            <div class="col s12">
+                                <input hidden name="etape" value="2">
+                                <button class="btn-small lighten-1 waves-effect waves-light">Accepter</button>
+                            </div>
+                        </form>
+                    </fieldset>
+                </div>
+
+                <div class="row">
+                    <a class="btn blue" href="/api/mouvement" class="btn">Retour</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer'); %>

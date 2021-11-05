@@ -1,0 +1,610 @@
+<%- include('../partials/header'); %>
+
+<style>
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0;
+    /* <-- Apparently some margin are still there even though it's hidden */
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+    /* Firefox */
+  }
+</style>
+
+<div class="container">
+  <div class="row">
+    <div class="card z-depth-2">
+      <div class="card-content ">
+        <span class="card-title">ATTESTATION DU MOUVEMENT COMMERCIAL</span>
+        <div class="card-tabs">
+          <ul class="tabs ">
+            <li class="tab col s6 "> <a class="blue-text" href="#generation">Generation</a></li>
+            <li class="tab col s6 "> <a class="blue-text" href="#consultation">Consultation</a></li>
+          </ul>
+          <div id="generation">
+            <form style="margin-top:2vw;" action="/api/mouvement" method="post">
+              <div class="row">
+                <div class="input-field col s6">
+                  <input id="compte" name="compte" type="text" required>
+                  <label for="compte">N° De Compte</label>
+                </div>
+                <div class="input-field col s5">
+                  <input id="agence" name="agence" type="text">
+                  <label for="agence">Agence</label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="input-field col s4">
+                  <i class="material-icons prefix">date_range</i>
+                  <input type="text" id="dateDebut" class="datepicker" name="dateDebut" required>
+                  <label for="dateDebut">Date Debut</label>
+                </div>
+                <div class="input-field col s4">
+                  <i class="material-icons prefix">date_range</i>
+                  <input type="text" id="dateFin" class="datepicker" name="dateFin" required>
+                  <label for="dateFin">Date Fin</label>
+                </div>
+                <div class="input-field col s3">
+                  <input id="agence" type="number" step="0.01" name="montant" required>
+                  <label for="agence">Montant</label>
+                </div>
+                <div style="margin-top: 20px;" class="col s1">
+                  <button type="button" onclick="addMouvement();" class="btn-floating pulse blue"><i
+                      class="material-icons ">add</i></button>
+                </div>
+                <input type="hidden" name="etape" value="1">
+              </div>
+              <div id="mouvement">
+              </div>
+              <div class="row">
+                <button class="btn blue">Enregister</button>
+                <a href="/api/index" class="btn">Retour</a>
+              </div>
+            </form>
+          </div>
+          <div id="consultation">
+            <span style="margin-top:1vw;" class="card-title">CRITERE DE RECHERCHE</span>
+            <form style="margin-top:1vw;" action="/api/mouvement/index" method="GET">
+              <div class="row">
+                <div class="input-field col s6">
+                  <input id="compte" name="ncp" type="text">
+                  <label for="compte">N° De Compte</label>
+                </div>
+                <div class="input-field col s6">
+                  <input disabled id="age" value="<%= user.agence %> " name="age" type="text">
+                  <label for="age">Agence</label>
+                </div>
+                <div class="input-field col s6 ">
+                  <select id="etape" name="etape">
+                    <option value="" disabled selected>Etat Attestation</option>
+                    <option value="1">Attestation Initée</option>
+                    <option value="2">Attestation Acceptée</option>
+                    <option value="3">Attestation Rejetée</option>
+                  </select>
+                  <label data-error="Select an option" for="etape">Etat Attestation</label>
+                </div>
+                <div class="input-field col s6">
+                  <input id="id" name="id" type="text">
+                  <label for="id">ID Document</label>
+                </div>
+                <div class="input-field col s6">
+                  <i class="material-icons prefix">date_range</i>
+                  <input id="dateDebut1" name="dateDebut1" class="datepicker" type="text">
+                  <label for="dateDebut1">date Dédut </label>
+                </div>
+                <div class="input-field col s6">
+                  <i class="material-icons prefix">date_range</i>
+                  <input id="dateFin1" name="dateFin1" class="datepicker" type="text">
+                  <label for="dateFin1">date Fin </label>
+                </div>
+              </div>
+
+              <div class="row">
+                <button class="btn">rechercher</button>
+              </div>
+            </form>
+            <span class="card-title" style="margin-top:2vw;">RESULTAT DE RECHERCHE</span>
+            <table class="striped" id="mouvementTable">
+              <thead>
+                <tr>
+                  <th>Id Attestation</th>
+                  <th>Agence</th>
+                  <th>N° Compte</th>
+                  <th>Date</th>
+                  <th>Etat</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal1" class="modal">
+  <div class="modal-content">
+    <h4>Détail ATTESTATION DU MOUVEMENT COMMERCIAL</h4>
+    <div class="collection">
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="" id="accepter" class="modal-close waves-effect waves-green btn-flat">Accepter</a>
+    <a href="" id="refuser" class="modal-close waves-effect waves-green btn-flat">Rejeter</a>
+    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Retour</a>
+  </div>
+</div>
+
+
+<%- include('../partials/footer'); %>
+
+<script>
+  //select modal
+  const modal = document.querySelector(".modal-content .collection");
+  const acceptModal = document.querySelector(".modal-footer #accepter");
+  const refuseModal = document.querySelector(".modal-footer #refuser");
+  //activate modals
+  $('.modal').modal();
+
+  //initiale table
+  const table = $('#mouvementTable').DataTable({
+    bFilter: false,
+    ordering: true,
+    lengthChange: false,
+    paging: true,
+    dom: 'Bfrtip',
+    buttons: [{
+      extend: 'excel',
+      tag: 'a',
+      text: "<i class='material-icons medium' > cloud_download</i>",
+      title: 'List Attestations Mouvement'
+    }],
+    language: {
+      "url": "/public/js/datatable_French.json"
+    },
+    /* pagingType: "simple", */
+    columns: [{
+        data: '_id',
+        "fnCreatedCell": function (nTd, sData, oData, iRow, iCol) {
+          $(nTd).html(
+            `<a class="detail" href="/api/mouvement/${oData._id}">${oData._id}</a>`);
+        }
+      },
+      {
+        data: 'age'
+      },
+      {
+        data: 'ncp'
+      },
+      {
+        data: 'date',
+        type: 'date',
+        render: function (value) {
+          if (value === null) return "";
+          return moment(value).format('DD/MM/YYYY HH:MM');
+        }
+      },
+      {
+        data: 'etape',
+        render: function (value) {
+
+          if (value === "1") {
+            return "Demande initiée"
+          } else if (value === "2") {
+            return "Demande Acceptée"
+          } else {
+            return "Demande Rejetée"
+          }
+
+        }
+      }
+    ]
+  });
+
+
+  //add mouvement
+  let num = 1
+
+  function addMouvement() {
+
+    num++
+
+    const mouvement = document.getElementById("mouvement");
+    if (mouvement.childElementCount < 4) {
+
+      const insertDiv = document.createElement("div");
+      insertDiv.setAttribute("class", "row removeClass" + num);
+      let element = '<div class="input-field col s4">';
+      element += '<i class="material-icons prefix">date_range</i>';
+      element += '<input type="text" id="dateDebut' + num +
+        '" class="datepicker" name="dateDebut" required>';
+      element += '<label for="dateDebut' + num + '">Date Debut</label></div>'
+      element += '<div class="input-field col s4">';
+      element += '<i class="material-icons prefix">date_range</i>';
+      element += '<input type="text" id="dateFin' + num + '" class="datepicker" name="dateFin" required>';
+      element += '<label for="dateFin' + num + '">Date Fin</label></div>'
+      element += '<div class="input-field col s3">'
+      element += '<input id="montant' + num + '" type="text" name="montant" required>';
+      element += '<label for="montant' + num + '">Montant</label></div>';
+      element +=
+        '<div style="margin-top: 20px;" class="col s1"> <button type="button" onclick="removeMouvement(' + num +
+        ')"; class="btn-floating"><i class="material-icons ">remove</i></button></div>';
+      insertDiv.innerHTML = element;
+      mouvement.appendChild(insertDiv);
+
+      $('.datepicker').datepicker({
+        disableWeekends: true,
+        showClearBtn: true,
+        autoClose: true,
+        format: 'dd-mm-yyyy',
+        i18n: {
+
+          months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre',
+            'Novembre', 'Décembre'
+          ],
+          monthsShort: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
+          weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+          weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+          weekdaysAbbrev: ['D', 'L', 'M', 'M', 'J', 'V', 'S']
+        },
+
+
+      });
+    } else {
+
+      M.toast({
+        html: "Numbre maximum de mouvements atteint",
+        displayLength: 6000,
+        classes: 'red rounded h4'
+      })
+    }
+
+  };
+
+  function removeMouvement(id) {
+
+    document.querySelector(".removeClass" + id).remove()
+  }
+
+
+  //activate datepicker
+  $('.datepicker').datepicker({
+    disableWeekends: true,
+    showClearBtn: true,
+    autoClose: true,
+    format: 'dd-mm-yyyy',
+    i18n: {
+
+      months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre',
+        'Novembre', 'Décembre'
+      ],
+      monthsShort: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
+      weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+      weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+      weekdaysAbbrev: ['D', 'L', 'M', 'M', 'J', 'V', 'S']
+    },
+
+
+  });
+
+
+  //handel form submition
+  $("#generation form").submit(async function (e) {
+
+    e.preventDefault();
+
+    let confirmMessage;
+
+    confirmMessage = confirm('Etes-vous sur de vouloir effectuer l\'opération?');
+
+    if (!confirmMessage) {
+
+      M.toast({
+        html: "Demande Annulée",
+        displayLength: 6000,
+        classes: 'red rounded h4'
+      })
+
+      return false
+
+    } else {
+
+      let form = $(this);
+      //extract value from form input
+      let data = form.serializeArray();
+      //create an array of datedebut
+
+      let dateDebut = data.reduce((accumulator, element) => {
+
+        if (element.name == "dateDebut") {
+
+          accumulator.push(element.value);
+
+        }
+
+        return accumulator;
+
+      }, []);
+
+      //create an array of dateFin
+      let dateFin = data.reduce((accumulator, element) => {
+
+        if (element.name == "dateFin") {
+
+          accumulator.push(element.value);
+
+        }
+
+        return accumulator;
+
+      }, [])
+
+      //create an array of montant
+
+      let montant = data.reduce((accumulator, element) => {
+
+        if (element.name == "montant") {
+
+          accumulator.push(element.value);
+
+        }
+
+        return accumulator;
+
+      }, [])
+
+      //create the data to sned to server
+
+      function getFormData(data) {
+        var unindexed_array = data;
+        var indexed_array = {};
+        $.map(unindexed_array, function (n, i) {
+          indexed_array[n['name']] = n['value'];
+        });
+        return indexed_array;
+      }
+
+      data = getFormData(data)
+
+      data.dateDebut = dateDebut;
+      data.dateFin = dateFin;
+      data.montant = montant;
+
+      //send request
+      try {
+        const res = await fetch('/api/mouvement', {
+          method: 'POST',
+          body: JSON.stringify({
+            data
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+
+
+        const result = await res.json()
+        //clear input field
+        $("#generation form").trigger('reset');
+        //send success message
+        M.toast({
+          html: "Demande Attestion Mouvement Commercial N° " + result.result._id + " initiée",
+          displayLength: 6000,
+          classes: 'green rounded h4'
+        })
+
+      } catch (err) {
+
+        console.log(err)
+      }
+
+    }
+
+  })
+
+
+  //handel search form
+  $("#consultation form").submit(async function (e) {
+    e.preventDefault()
+    table.clear().draw()
+
+    //get value
+    const ncp = this.ncp.value;
+    const age = this.age.value;
+    const id = this.id.value;
+    const etape = this.etape.value;
+    const dateDebut = this.dateDebut1.value;
+    const dateFin = this.dateFin1.value;
+
+
+    //send the request
+    try {
+      const res = await fetch('/api/mouvement/index', {
+        method: 'POST',
+        body: JSON.stringify({
+          ncp,
+          age,
+          id,
+          etape,
+          dateDebut,
+          dateFin
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await res.json()
+
+
+      table.rows.add(data.mouvement).draw();
+    } catch (err) {
+
+      console.log(err)
+
+    }
+  })
+
+
+  //handel affichage detail attestation
+  table.on('draw', function () {
+    // console.log( 'Redraw occurred at: '+new Date().getTime() );
+
+    const detail = document.querySelectorAll(".detail");
+
+    detail.forEach(element => {
+
+      element.addEventListener("click", async function (e) {
+
+        e.preventDefault();
+
+        let id = this.innerHTML
+        try {
+          const resDetail = await fetch(`/api/mouvement/${id}`, {
+            method: 'POST',
+            body: JSON.stringify({
+              id
+            }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+
+          })
+
+          const resultDetail = await resDetail.json();
+          console.log(resultDetail)
+          console.log(modal)
+
+          //aliment modal div
+          let ribDetail = "";
+          ribDetail +=
+            `<a data-id="${resultDetail.mouvement._id}"  class="collection-item black-text"> <b>ID Attestation : </b> <span>${resultDetail.mouvement._id}</span> </a>`
+          ribDetail +=
+            `<a  class="collection-item black-text"><b>Agence : </b> <span> ${resultDetail.mouvement.age}</span></a>`
+          ribDetail +=
+            `<a  class="collection-item black-text"><b>Compte : </b> <span> ${resultDetail.mouvement.ncp}</span></a>`
+          ribDetail +=
+            `<a  class="collection-item black-text"><b>Date : </b> <span> ${moment(resultDetail.mouvement.date).format('DD/MM/YYYY HH:MM')}</span></a>`
+          ribDetail +=
+            `<a  class="collection-item black-text"><b>Opérateur : </b> <span> ${resultDetail.mouvement.username}</span></a>`
+          ribDetail += `<a type=""`
+          modal.innerHTML = ribDetail
+          //handel accpet button
+          $(".modal-footer #STATUER").click(async (e) => {
+
+            e.preventDefault();
+
+            let confirmMessage
+            confirmMessage = confirm('Etes-vous sur de vouloir valider l\'opération?');
+            if (!confirmMessage) {
+
+              return false
+
+            } else {
+              const a = document.querySelector(".modal .collection a")
+
+              let dataId = a.dataset.id
+
+
+              try {
+                const res = await fetch(`/api/mouvement/valid`, {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    dataId
+                  }),
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                })
+
+                const result = await res.json()
+
+                setTimeout(function(){
+                  M.toast({
+                  html: "Demande Attestion Mouvement Commercial N° validé",
+                  displayLength: 6000,
+                  classes: 'green rounded h4'
+                })
+                },1000)
+         
+
+                //table.ajax.data(res.mouvement).reload();
+
+              } catch (err) {
+
+                console.log(err)
+              }
+
+
+               const form = document.querySelector("#consultation form")
+
+              //get table value to recharge data
+              const ncp = form.ncp.value;
+              const age = form.age.value;
+              const id = form.id.value;
+              const etape = form.etape.value;
+              const dateDebut = form.dateDebut1.value;
+              const dateFin = form.dateFin1.value;
+
+
+              //send the request
+              try {
+                const res = await fetch('/api/mouvement/index', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    ncp,
+                    age,
+                    id,
+                    etape,
+                    dateDebut,
+                    dateFin
+                  }),
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                })
+
+                const data = await res.json()
+
+               
+                table.clear().rows.add(data.mouvement).draw();
+                
+
+
+              } catch (err) {
+
+                console.log(err)
+
+              } 
+
+            }
+
+          })
+          //create modal trigger
+          const linkDetail = document.createElement("a");
+          linkDetail.href = "#modal1";
+
+          linkDetail.classList.add("modal-trigger");
+          document.body.appendChild(linkDetail)
+          linkDetail.click();
+          document.body.removeChild(linkDetail);
+
+        } catch (err) {
+
+          console.log(err)
+        }
+
+      })
+
+    })
+  });
+
+  //handel valider mouvement commercial
+  $(".modal-footer #accepter").click()
+</script>
