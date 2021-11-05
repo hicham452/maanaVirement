@@ -46,7 +46,7 @@ app.set("view engine", "ejs");
 //specification du dossier public
 app.use("/public",express.static(__dirname + "/public"));
 
-
+console.log('hello world')
 
 // Global variables
  app.use(function (req, res, next) {
